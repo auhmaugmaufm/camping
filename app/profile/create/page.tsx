@@ -1,26 +1,24 @@
 import React from 'react'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/button'
+import FormInput from '@/components/form/FormInput'
+import { SubmitButton } from '@/components/form/Buttons'
+import FormContainer from '@/components/form/FormContainer'
+import { createProfileAction } from '@/actions/actions'
 
-const createProfileAction = async (formData:FormData) => {
-    'use server'
-    const firstName = formData.get('firstName') as String
-    console.log(firstName)
-}
+
 
 const CreateProfile = () => {
     return (
         <section>
             <h1 className='text-2xl font-semibold mb-8 capitalize'>new user</h1>
-            <div>
-                <form action={createProfileAction}>
-                    <div className='mb-2'>
-                        <Label htmlFor='firstName'>First Name</Label>
-                        <Input name='firstName' type='text'/>
+            <div className='border p-8 rounded-xl max-w-lg '>
+                <FormContainer action={createProfileAction}>
+                    <div className='grid md:grid-cols-2 gap-4 mt-4'>
+                        <FormInput name='firstName' label='Firstname' type='text' placeholder='Firstname' />
+                        <FormInput name='lastName' label='Lastname' type='text' placeholder='Lastname' />
+                        <FormInput name='userName' label='Username' type='text' placeholder='Username' />
                     </div>
-                    <Button type='submit' size='lg'>Create Profile</Button>
-                </form>
+                    <SubmitButton text='create profile' size='lg' className='' />
+                </FormContainer>
             </div>
         </section>
     )
