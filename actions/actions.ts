@@ -1,39 +1,84 @@
 'use server'
 
 import { profileSchema, ValidateWithZod } from "@/utils/schemas";
+import { clerkClient, currentUser } from "@clerk/nextjs/server";
+import { db } from "@/utils/db";
+import { redirect } from "next/navigation";
 
-// import { z, ZodSchema } from 'zod'
 
-// //const profileSchema = z.string().min(2,{message: 'String must more than 2 charactor'})
+const getAuthUser = async () => {
+    const user = await currentUser()
+    if (!user) {
+        throw new Error('You must logged In !!!')
+    }
+    if (!user.privateMetadata.hasProfile) redirect('/profile/create')
 
-// const profileSchema = z.object({
-//     firstName: z.string().min(2, { message: 'Firstname more than 2 charactors' }),
-//     lastName: z.string().min(2, { message: 'Lastname more than 2 charactors' }),
-//     userName: z.string().min(2, { message: 'Username more than 2 charactors' }),
-// })
-
-// const ValidateWithZod = (schema, data) => {
-//     const result = schema.safeParse(data)
-//     if (!result.success) {
-//         const errors = result.error?.errors.map((error) => error.message)
-//         throw new Error(errors.join(','))
-//     }
-//     return result.data
-// }
+    return user
+}
 
 export const createProfileAction = async (prevState: any, formData: FormData) => {
 
-
     try {
+        const user = await currentUser()
+        if (!user) throw new Error('Please login!!!')
+
         // const firstName = formData.get('firstName') as string
         // const lastName = formData.get('lastName') as string ทำแทนด้วย rawData
         const rawData = Object.fromEntries(formData)
         const validateField = ValidateWithZod(profileSchema, rawData)
-        console.log('validated', validateField);
-    } catch (error) {
-        console.log(error);
-        return { message: error.message || 'an error server' }
-    }
+        //console.log('validated', validateField);
+        await db.profile.create({
+            data: {
+                clerkId: user.id,
+                email: user.emailAddresses[0].emailAddress,
+                profileImage: user.imageUrl ?? '',
+                ...validateField,
+            }
+        })
 
-    return { message: 'Create Profile Success!!!' }
+        const client = await clerkClient()
+        await client.users.updateUserMetadata(user.id, {
+            privateMetadata: {
+                hasProfile: true
+            }
+        })
+
+
+        //return { message : 'Create Profile Successfull!!' }
+    } catch (error) {
+        //console.log(error);
+        if (error instanceof Error) {
+            // คืออะไรหว่า
+            return { message: error.message || 'an error server' }
+        }
+        return { message: 'an error server' }
+
+    }
+    redirect('/')
+}
+
+const renderError = (error: unknown): { message: string } => {
+    //code body
+    return {
+      message: error instanceof Error ? error.message : "An Error!!!",
+    };
+  };
+
+export const createLandmarkAction = async (prevState: any, formData: FormData): Promise<{ message: string }> => {
+
+    try {
+        const user = await currentUser()
+        if (!user) throw new Error('Please login!!!')
+
+        const rawData = Object.fromEntries(formData)
+        // const validateField = ValidateWithZod(profileSchema, rawData)
+        console.log('validated', rawData);
+        
+       
+        return { message : 'Create Landmark Successfull!!' }
+    } catch (error) {
+        return renderError(error);
+
+    }
+    //redirect('/')
 }
