@@ -53,7 +53,7 @@ export const CardSubmitButton = ({ isFavorite }: { isFavorite: boolean }) => {
     //console.log('is', isFavorite);
     const { pending } = useFormStatus()
     return (
-        <Button type='submit' size='icon' variant='outline'>
+        <Button type='submit' size='icon' variant='outline' >
             {
                 pending ? <LoaderCircle className='animate-spin'/> : isFavorite ? <Heart color='red' fill='red' /> : <Heart />
             }

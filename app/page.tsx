@@ -3,14 +3,14 @@ import LandmarkContainer from "@/components/home/LandmarkContainer"
 import { Button } from "@/components/ui/button"
 import { Suspense } from "react"
 
-const HomePage = () => {
+const HomePage = async ({searchParams}:{searchParams:{ search?:string, category?:string }}) => {
   // Search
-
+  const { search,category } = await searchParams
 
   return (
     <section>
       <Suspense fallback={<LoadingCard />}>
-        <LandmarkContainer />
+        <LandmarkContainer search={search} category={category}/>
       </Suspense>
     </section>
   )

@@ -101,10 +101,17 @@ export const createLandmarkAction = async (prevState: any, formData: FormData): 
     redirect('/')
 }
 
-export const fetchLandmarks = async (
-    // search
-) => {
+
+export const fetchLandmarks = async ({ search = '', category }: { search?: string, category?: string }) => {
     const landmarks = await db.landmark.findMany({
+        where: {
+            category,
+            OR: [
+                { name: { contains: search, mode: 'insensitive' } },
+                { description: { contains: search, mode: 'insensitive' } },
+                { province: { contains: search, mode: 'insensitive' } },
+            ]
+        },
         orderBy: {
             createdAt: 'desc'
         }
@@ -112,6 +119,19 @@ export const fetchLandmarks = async (
 
     return landmarks
 }
+
+export const fetchLandmarksHero = async () => {
+    const landmarks = await db.landmark.findMany({
+        orderBy: {
+            createdAt: 'desc'
+        },
+        take: 5 // show 5 slide first
+    })
+
+    return landmarks
+}
+
+
 
 export const fetchFavoriteId = async ({ landmarkId }: { landmarkId: string }) => {
     const user = await getAuthUser()
@@ -125,6 +145,20 @@ export const fetchFavoriteId = async ({ landmarkId }: { landmarkId: string }) =>
         }
     })
     return favorite?.id || null
+}
+
+export const fetchLandmarkDetail = async ({ id }: { id: string }) => {
+    return (
+        db.landmark.findUnique({
+            where: {
+                id: id,
+
+            },
+            include: {
+                profile: true
+            }
+        })
+    )
 }
 
 export const toggleFavoriteAction = async (prevState: {
@@ -169,8 +203,8 @@ export const fetchFavorites = async () => {
             profileId: user.id
         },
         select: {
-            landmark:{
-                select:{
+            landmark: {
+                select: {
                     id: true,
                     name: true,
                     description: true,
@@ -185,5 +219,5 @@ export const fetchFavorites = async () => {
         }
     })
 
-    return favorites.map((favorite)=>favorite.landmark)
+    return favorites.map((favorite) => favorite.landmark)
 }

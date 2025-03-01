@@ -8,6 +8,7 @@ import 'swiper/css/navigation';
 
 
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
+import OtherInfo from "./OtherInfo";
 
 
 const Hero = ({ landmarks }: { landmarks: LandmarkCardProps[] }) => {
@@ -29,11 +30,16 @@ const Hero = ({ landmarks }: { landmarks: LandmarkCardProps[] }) => {
         {
           landmarks.map((landmark) => {
             return (
-                <SwiperSlide key={landmark.id} className="group">
-                  <div className="relative overflow-hidden">
-                    <img className="w-full h-[450px] object-cover brightness-75 group-hover:brightness-50 translate-all duration-300" src={landmark.image} />
+              <SwiperSlide key={landmark.id} className="group">
+                <div className="relative overflow-hidden">
+                  <img className="w-full h-[450px] object-cover brightness-75 group-hover:brightness-50 translate-all duration-300" src={landmark.image} />
+                  <div className="absolute bottom-0 left-0 z-50">
+                    <div className="col-span-4 mb-4 flex h-full flex-1 justify-end px-5 md:justify-end md:px-10 md:mb-4">
+                      <OtherInfo landmark={landmark}/>
+                    </div>
                   </div>
-                </SwiperSlide>
+                </div>
+              </SwiperSlide>
             )
           })
         }
