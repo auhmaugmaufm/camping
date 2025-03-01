@@ -6,6 +6,7 @@ import { db } from "@/utils/db";
 import { redirect } from "next/navigation";
 import { uploadFile } from "@/utils/supabase";
 import { BedDouble } from "lucide-react";
+import { revalidatePath } from "next/cache";
 
 
 const getAuthUser = async () => {
@@ -71,15 +72,15 @@ export const createLandmarkAction = async (prevState: any, formData: FormData): 
         const user = await getAuthUser()
         const rawData = Object.fromEntries(formData)
         const file = formData.get('image') as File
-        
+
         // validate data
         const validateField = ValidateWithZod(LandmarkSchema, rawData)
         const validatedFile = ValidateWithZod(imageSchema, { image: file })
-        
+
         // upload image to supabase
         const fullPath = await uploadFile(validatedFile.image)
         console.log(fullPath);
-        
+
 
         // insert to DB
         await db.landmark.create({
@@ -89,7 +90,7 @@ export const createLandmarkAction = async (prevState: any, formData: FormData): 
                 profileId: user.id
             },
         })
-        
+
         // console.log('validated', validatedFile);
         // console.log('validated', validateField); 
         //return { message: 'Create Landmark Successfull!!' }
@@ -110,4 +111,79 @@ export const fetchLandmarks = async (
     })
 
     return landmarks
+}
+
+export const fetchFavoriteId = async ({ landmarkId }: { landmarkId: string }) => {
+    const user = await getAuthUser()
+    const favorite = await db.favorite.findFirst({
+        where: {
+            landmarkId: landmarkId,
+            profileId: user.id
+        },
+        select: {
+            id: true
+        }
+    })
+    return favorite?.id || null
+}
+
+export const toggleFavoriteAction = async (prevState: {
+    favoriteId: string | null;
+    landmarkId: string
+    pathname: string
+
+}) => {
+    const { favoriteId, landmarkId, pathname } = prevState
+    // console.log(prevState)
+    const user = await getAuthUser()
+    try {
+        if (favoriteId) {
+            // Delete
+            await db.favorite.delete({
+                where: {
+                    id: favoriteId
+                }
+            })
+        } else {
+            // Create
+            await db.favorite.create({
+                data: {
+                    landmarkId: landmarkId,
+                    profileId: user.id
+
+                }
+            })
+        }
+        // this pathname is equal '/'
+        revalidatePath(pathname) // refresh / update show favorite button
+        return { message: favoriteId ? 'Remove Favorite Success' : 'Add Favorite Success' }
+    } catch (error) {
+        return renderError(error)
+    }
+}
+
+export const fetchFavorites = async () => {
+    const user = await getAuthUser()
+    const favorites = await db.favorite.findMany({
+        where: {
+            profileId: user.id
+        },
+        select: {
+            landmark:{
+                select:{
+                    id: true,
+                    name: true,
+                    description: true,
+                    image: true,
+                    price: true,
+                    province: true,
+                    lat: true,
+                    lng: true,
+                    category: true
+                }
+            }
+        }
+    })
+
+    return favorites.map((favorite)=>favorite.landmark)
 }

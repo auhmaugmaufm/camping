@@ -1,6 +1,11 @@
-const FovoritePage = () => {
+import { fetchFavorites } from "@/actions/actions"
+import LandmarkList from "@/components/home/LandmarkList"
+
+const FovoritePage = async () => {
+  const favorites = await fetchFavorites()
+  
   return (
-    <div>FovoritePage</div>
+    <LandmarkList landmarks={favorites}/>
   )
 }
 export default FovoritePage
