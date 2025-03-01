@@ -7,6 +7,7 @@ import CategoryInput from '@/components/form/CategoryInput'
 import TextareaInput from '@/components/form/TextareaInput'
 import ProvincesInput from '@/components/form/ProvincesInput'
 import MapLandmark from '@/components/map/MapLandmark'
+import ImageInput from '@/components/form/ImageInput'
 
 
 
@@ -27,6 +28,7 @@ const CreateCamp = async () => {
                         <FormInput name='price' label='Price' type='number' placeholder='Price' />
                         <ProvincesInput />
                     </div>
+                    <ImageInput />
 
                     <MapLandmark location={{lat: 20,lng: 100}}/>
 

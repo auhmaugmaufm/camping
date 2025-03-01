@@ -1,12 +1,15 @@
+import LandmarkContainer from "@/components/home/LandmarkContainer"
 import { Button } from "@/components/ui/button"
 
 const HomePage = () => {
-  return (
-    <div>
-      HomePage
-      <Button variant='outline'>Submit</Button>
+  // Search
 
-    </div>
+
+  return (
+    <>
+      <LandmarkContainer />
+
+    </>
   )
 }
 export default HomePage
